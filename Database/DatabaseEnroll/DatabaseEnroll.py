@@ -20,16 +20,24 @@ async def EnrollUser(output,pcode,eye_side,cid) :
     has = utility.has_collection("iris_collection")
     print(f"Does collection iris_collection exist in Milvus: {has}")
     data = output["iris_template"]
-    combined_vector = np.concatenate([
+    combined_codes = np.concatenate([
         code.flatten()
-        for code in data.iris_codes + data.mask_codes
+        for code in data.iris_codes
+    ])
+    combined_masks = np.concatenate([
+        code.flatten()
+        for code in data.mask_codes
     ])
 
     Data = [
-        {"iris_vector" : convert_bool_list_to_bytes(combined_vector),
+        {"iris_codes" : convert_bool_list_to_bytes(combined_codes),
+         "mask_codes" : convert_bool_list_to_bytes(combined_masks),
         "pcode": pcode,
-        "cid": cid}
+        "cid": cid,
+        "eye_side": eye_side}
     ]
     client.insert(data=Data ,collection_name="iris_collection")
     client.load_collection(collection_name="iris_collection")
+    connections.disconnect("default")
+    print("Disconnected to Milvus.")
     return {"status": "success"}
