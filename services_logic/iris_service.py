@@ -38,3 +38,5 @@ async def search_user(file: UploadFile, eye_side: str, cid: str):
         raise HTTPException(status_code=400, detail="Image does not contain iris")
     status = await SearchUser(output=output,eye_side=eye_side,cid=cid)
     return status
+
+

@@ -7,6 +7,7 @@ from pymilvus import (
     Collection,
 )
 from utils.file_utils import convert_bool_list_to_bytes, convert_bytes_to_template, convert_bytes_to_bool_list
+from utils.iris_utils import Iris_Matcher
 async def SearchUser(output,eye_side,cid) :
     client = MilvusClient(uri="http://localhost:19530")
     fmt = "\n=== {:30} ===\n"
@@ -37,12 +38,16 @@ async def SearchUser(output,eye_side,cid) :
     )
 
     template_array = []
+    pcode_array = []
+    cid_array = []
     for hits in res:
         for hit in hits:
             vector = hit.entity.get("iris_codes")   # This is your stored binary vector
             mask = hit.entity.get("mask_codes")     # If stored
-            doc_id = hit.id                         # If you stored an "id" field
-            score = hit.distance
+            pcode = hit.pcode                         # If you stored an "id" field
+            cid = hit.cid
+            pcode_array.append(pcode)
+            cid_array.append(cid)
             mask = np.array(mask)
             mask = convert_bytes_to_bool_list(mask)
             masks = np.concatenate([
@@ -54,10 +59,15 @@ async def SearchUser(output,eye_side,cid) :
             new_data = convert_bytes_to_template(combined_vector)
             template_array.append(new_data)
 
-    print(len(template_array))
-    
-    
+    print("Number of Entries: ",len(template_array))
+    match_result = Iris_Matcher(data,template_array)
+    closest_match = match_result[0]
+    closest_distance = match_result[1]
+    index = template_array.index(closest_match)
 
+    print("Closest result has a distance of: "+ str(closest_distance))
+    print("With pcode: ", pcode_array[index])
+    print("cid: ", cid_array[index])
     connections.disconnect("default")
     print("Disconnected to Milvus.")
-    return ["Client ID: %d"%doc_id,"Distance: %.4f"%score]
+    return ["Searched %d entries"%len(template_array)]

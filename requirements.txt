@@ -1,2 +1,4 @@
 fastapi==0.115.12
 open-iris==1.6.0
+pymilvus==2.5.11
+python==3.11.9
