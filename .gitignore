@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .env
 BMT-20/
+volumes/
