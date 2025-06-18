@@ -70,4 +70,4 @@ async def SearchUser(output,eye_side,cid) :
     print("cid: ", cid_array[index])
     connections.disconnect("default")
     print("Disconnected to Milvus.")
-    return ["Searched %d entries"%len(template_array)]
+    return ["Matched with pcode: %s"%pcode,"and cid: %s"%cid]
