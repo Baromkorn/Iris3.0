@@ -60,14 +60,19 @@ async def SearchUser(output,eye_side,cid) :
             template_array.append(new_data)
 
     print("Number of Entries: ",len(template_array))
-    match_result = Iris_Matcher(data,template_array)
+    match_result = await Iris_Matcher(data,template_array)
     closest_match = match_result[0]
     closest_distance = match_result[1]
-    index = template_array.index(closest_match)
+    index = match_result[2]
+    
+    
 
     print("Closest result has a distance of: "+ str(closest_distance))
     print("With pcode: ", pcode_array[index])
     print("cid: ", cid_array[index])
     connections.disconnect("default")
     print("Disconnected to Milvus.")
-    return ["Matched with pcode: %s"%pcode,"and cid: %s"%cid]
+    if closest_distance > 0.37 :
+        return ["No Match in system, HD>0.37"]
+    if closest_distance <= 0.37 :
+        return ["Matched with pcode: %s"%(pcode_array[index]),"and cid: %s"%(cid_array[index]),"Distance: %.6f"%(closest_distance)]
