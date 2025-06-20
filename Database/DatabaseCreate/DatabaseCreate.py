@@ -10,8 +10,6 @@ async def CreateDatabase() :
     client = MilvusClient(uri="http://localhost:19530")
 
     fmt = "\n=== {:30} ===\n"
-    search_latency_fmt = "search latency = {:.4f}s"
-    num_entities, dim = 3000, 32768
 
     print(fmt.format("start connecting to Milvus"))
     connections.connect("default", host="localhost", port="19530")

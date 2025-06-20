@@ -32,7 +32,7 @@ async def SearchUser_singleiris(output,eye_side) :
         data=[query_vector],
         anns_field="iris_codes",
         search_params=search_params,
-        limit=100,
+        limit=5,
         filter=filter_term,
         output_fields=["pcode","cid","iris_codes","mask_codes"]
     )
@@ -70,17 +70,18 @@ async def SearchUser_singleiris(output,eye_side) :
     closest_distance = match_result[1]
     index = match_result[2]
     
-    
-
+    hd = closest_distance
+    scaled_hd = int(hd * 2000)
     print("Closest result has a distance of: "+ str(closest_distance))
     print("With pcode: ", pcode_array[index])
     print("cid: ", cid_array[index])
     connections.disconnect("default")
     print("Disconnected to Milvus.")
     if closest_distance > 0.37 :
-        return ["No Match in system, HD>0.37"]
+        return {"status": "failed",
+                "reason": "No Match in system, HD>0.37"}
     if closest_distance <= 0.37 :
-        return ["Matched with pcode: %s"%(pcode_array[index]),"and cid: %s"%(cid_array[index]),"Distance: %.6f"%(closest_distance)]
+        return {"pcode": pcode_array[index],"cid": (cid_array[index]), "score: ": (scaled_hd)}
     
 async def SearchUser_bothiris(output_L, output_R) :
     client = MilvusClient(uri="http://localhost:19530")
@@ -110,7 +111,7 @@ async def SearchUser_bothiris(output_L, output_R) :
         data=[query_vector_L],
         anns_field="iris_codes",
         search_params=search_params,
-        limit=100,
+        limit=5,
         filter='eye_side like "left%"',
         output_fields=["pcode","cid","iris_codes","mask_codes"]
     )
@@ -159,7 +160,7 @@ async def SearchUser_bothiris(output_L, output_R) :
         data=[query_vector_R],
         anns_field="iris_codes",
         search_params=search_params,
-        limit=100,
+        limit=5,
         filter='eye_side like "right%"',
         output_fields=["pcode","cid","iris_codes","mask_codes"]
     )
@@ -196,14 +197,20 @@ async def SearchUser_bothiris(output_L, output_R) :
     closest_match_R = match_result_R[0]
     closest_distance_R = match_result_R[1]
     index_R = match_result_R[2]
-    
-
+    hd = (closest_distance_L+closest_distance_R)/2
+    scaled_hd = int(hd * 2000)
     connections.disconnect("default")
     print("Disconnected to Milvus.")
     if pcode_array_L[index_L] == pcode_array_R[index_R] and cid_array_L[index_L] == cid_array_R[index_R] :
         if closest_distance_L > 0.37 and closest_distance_R > 0.37:
-            return ["No Match in system, HD>0.37"]
+            return {"status": "failed",
+                    "reason": "No Match in system, HD>0.37"}
         if closest_distance_L <= 0.37 and closest_distance_R <= 0.37 :
-            return ["Matched with pcode: %s"%(pcode_array_L[index_L]),"and cid: %s"%(cid_array_L[index_L]),"Distance: %.6f"%((closest_distance_L+closest_distance_R)/2)]
+            return {"status": "success",
+                    "pcode": pcode_array_L[index_L],
+                    "cid": (cid_array_L[index_L]),
+                    "score: ": (scaled_hd)
+                    }
     else :
-        return ["Left and Right Iris do not match"]
+        return{"status": "failed",
+               "reason": "Left and Right Iris do not match"}
