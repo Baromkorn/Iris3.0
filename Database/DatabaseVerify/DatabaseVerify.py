@@ -25,6 +25,8 @@ async def VerifyUser (cid: str, output_L, output_R) :
         limit=1
     )
     print("Left eye query result:", res_L)
+    if not res_L :
+        return {"status": "failed", "reason": "No matching cid found in the database."}
     for hit in res_L:
         vector = hit.get("iris_codes")  
         mask = hit.get("mask_codes")
@@ -47,6 +49,8 @@ async def VerifyUser (cid: str, output_L, output_R) :
         limit=1
     )
     print("Right eye query result:", res_R)
+    if not res_R:
+        return {"status": "failed", "reason": "No matching cid found in the database."}
     for hit in res_R:
         vector = hit.get("iris_codes")   # This is your stored binary vector
         mask = hit.get("mask_codes")
