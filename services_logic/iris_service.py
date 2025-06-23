@@ -53,7 +53,7 @@ async def enroll_user(
 
     return status
 
-async def verify_user(cid: str, left_iris: Optional[UploadFile] = File(None), right_iris: Optional[UploadFile]= File(None)):
+async def verify_user(cid: str, left_iris: UploadFile, right_iris: UploadFile):
     if not left_iris and not right_iris:
         raise HTTPException(status_code=400, detail="At least one iris image must be provided.")
 

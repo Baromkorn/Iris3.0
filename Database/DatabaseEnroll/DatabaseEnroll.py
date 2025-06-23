@@ -34,11 +34,22 @@ async def EnrollUser_singleiris(output,pcode,eye_side,cid) :
         "cid": cid,
         "eye_side": eye_side}
     ]
-    client.insert(data=Data ,collection_name="iris_collection")
-    client.load_collection(collection_name="iris_collection")
+
+    existing = client.query(
+        collection_name="iris_collection",
+        filter=f'cid == "{cid}" and eye_side == "{eye_side}"',
+        output_fields=["cid"],
+        limit=1
+    )
     connections.disconnect("default")
     print("Disconnected to Milvus.")
-    return {"status": "success"}
+    if existing :
+        return {"status": "failed",
+                "reason": "duplicate found in database"}
+    else:
+        client.insert(data=Data ,collection_name="iris_collection")
+        client.load_collection(collection_name="iris_collection")
+        return {"status": "success"}
 
 async def EnrollUser_bothiris(output_L,output_R,pcode,cid) :
     client=MilvusClient(uri="http://localhost:19530")
@@ -81,9 +92,19 @@ async def EnrollUser_bothiris(output_L,output_R,pcode,cid) :
         "cid": cid,
         "eye_side": "right"}
     ]
-    client.insert(data=Data_L ,collection_name="iris_collection")
-    client.insert(data=Data_R ,collection_name="iris_collection")
-    client.load_collection(collection_name="iris_collection")
+    existing = client.query(
+        collection_name="iris_collection",
+        filter=f'cid == "{cid}"',
+        output_fields=["cid"],
+        limit=1
+    )
     connections.disconnect("default")
     print("Disconnected to Milvus.")
-    return {"status": "success"}
+    if existing :
+        return {"status": "failed",
+                "reason": "duplicate found in database"}
+    else :
+        client.insert(data=Data_L ,collection_name="iris_collection")
+        client.insert(data=Data_R ,collection_name="iris_collection")
+        client.load_collection(collection_name="iris_collection")
+        return {"status": "success"}
