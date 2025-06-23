@@ -40,7 +40,7 @@ async def verify(
     right_iris: UploadFile
 ):
     """
-    Verify a user's iris to cid in Database
+    Verify a user's iris to cid in Database, BOTH sides have to match, else it will return false
 
     Args:
         cid (str): Citizen ID to verify.
@@ -59,9 +59,13 @@ async def verify(
     res = await verify_user(cid, left_iris, right_iris)
     status = res.get("status")
     if status == "success" :
-        return True
+        match = res.get("match")
+        if match :
+            return True
+        else :
+            return False
     elif status == "failed" :
-        return False
+        return res
 
 @router.post("/search/")
 async def search(
@@ -99,4 +103,13 @@ async def check(pcode_or_cid: str):
             - available (bool, optional): True if already in database, False if not found
             - reason (str, optional): Additional details of status failed
     """
-    return await check_available(pcode_or_cid)
+    res = await check_available(pcode_or_cid)
+    status = res.get("status")
+    Used = res.get("available")
+    if status == "success" :
+        if Used :
+            return True
+        else :
+            return False
+    elif status == "failed" :
+        return res

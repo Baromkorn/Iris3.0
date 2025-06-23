@@ -18,6 +18,7 @@ async def check_available(pcode_or_cid: str) -> bool:
     client = MilvusClient(uri="http://localhost:19530")
     fmt = "\n=== {:30} ===\n"
     print(fmt.format("start connecting to Milvus"))
+    client.load_collection("iris_collection")
     res = client.query(collection_name="iris_collection",
             filter=filtered, 
             output_fields=["pcode", "cid"])
