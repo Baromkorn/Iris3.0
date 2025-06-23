@@ -9,7 +9,7 @@ from pymilvus import (
 from utils.file_utils import convert_bool_list_to_bytes, convert_bytes_to_template, convert_bytes_to_bool_list
 from core.iris_setup import matcher
 
-async def VerifyUser (cid: str, output, eye_side) :
+async def VerifyUser_singleiris (cid: str, output, eye_side) :
     client = MilvusClient(uri="http://localhost:19530")
     fmt = "\n=== {:30} ===\n"
     print(fmt.format("start connecting to Milvus"))
