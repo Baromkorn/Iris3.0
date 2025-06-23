@@ -52,8 +52,12 @@ async def verify_user(cid: str, left_iris: UploadFile, right_iris: UploadFile):
 
     if not output_L and not output_R:
         raise HTTPException(status_code=400, detail="Neither image contains a valid iris.")
-
-    return await VerifyUser(output_L=output_L, output_R=output_R, cid=cid)
+    if output_L and output_R:
+        return await VerifyUser(output_L=output_L, output_R=output_R, cid=cid)
+    elif output_L:
+        return await EnrollUser_singleiris(output=output_L, eye_side="left",cid=cid)
+    else:
+        return await EnrollUser_singleiris(output=output_R, eye_side="right", cid=cid)
 
 async def search_user(
     left_iris: Optional[UploadFile] = File(None),

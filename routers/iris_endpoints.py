@@ -36,11 +36,11 @@ async def enroll(
 @router.post("/verify/")
 async def verify(
     cid: str,
-    left_iris: UploadFile,
-    right_iris: UploadFile
+    left_iris: Optional[UploadFile]=None,
+    right_iris: Optional[UploadFile]=None
 ):
     """
-    Verify a user's iris to cid in Database, BOTH sides have to match, else it will return false
+    Verify a user's iris to cid in Database, BOTH sides have to match or else it will return false
 
     Args:
         cid (str): Citizen ID to verify.
