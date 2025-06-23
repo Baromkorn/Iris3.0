@@ -24,6 +24,8 @@ async def check_available(pcode_or_cid: str) -> bool:
     connections.disconnect("default")
     print("Disconnected to Milvus.")
     if res :
-        return True
+        return {"status": "success",
+                "available": True}
     else :
-        return False
+        return {"status": "success",
+                "available": False}

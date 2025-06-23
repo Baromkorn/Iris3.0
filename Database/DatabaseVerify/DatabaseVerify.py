@@ -67,16 +67,14 @@ async def VerifyUser (cid: str, output_L, output_R) :
     print("Distance of Right eye", distance_R)
     connections.disconnect("default")
     print("Disconnected to Milvus.")
-    if distance_L <= 0.37 :
-        if distance_R <= 0.37 :
-            return {"status": "success",
-                    "match": True,
-                    "message": "found a match in the database",
-                    "cid": cid}
-        else :
-            return {"status": "failed",
-                    "reason": "left eye matched, right eye error"}
+    if distance_L <= 0.37 and distance_R <= 0.37 :
+        return {"status": "success",
+                "match": True,
+                "message": "found a match in the database",
+                "cid": cid}
     else :
-        return {"status": "failed",
-                "reason": "left eye error"}
+        return {"status": "success",
+                "match": False,
+                "message": "no match found in database"}
+
 
