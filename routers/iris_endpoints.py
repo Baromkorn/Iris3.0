@@ -30,7 +30,7 @@ async def enroll(
     if status == "success" :
         return True
     elif status == "failed" :
-        return False
+        return res
 
 
 @router.post("/verify/")

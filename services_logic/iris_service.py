@@ -9,6 +9,9 @@ from Database.DatabaseSearch.DatabaseSearch_BothIris import SearchUser_bothiris
 from Database.DatabaseSearch.DatabaseSearch_SingleIris import SearchUser_singleiris
 from Database.DatabaseVerify.DatabaseVerify_BothIris import VerifyUser_bothiris
 from Database.DatabaseVerify.DatabaseVerify_SingleIris import VerifyUser_singleiris
+from utils.SaveImage import save_iris_image
+import uuid
+
 
 # Helper function to process an iris image
 async def process_iris(iris_file: Optional[UploadFile], eye_side: str) -> Optional[dict]:
@@ -38,12 +41,20 @@ async def enroll_user(
 
     if not output_L and not output_R:
         raise HTTPException(status_code=400, detail="Neither image contains a valid iris.")
-
+    unique_id = uuid.uuid4().hex
     if output_L and output_R:
+        left_path = save_iris_image(left_iris, cid, "L", unique_id)
+        print(f"Left iris saved to {left_path}")
+        right_path = save_iris_image(right_iris, cid, "R", unique_id)
+        print(f"Right iris saved to {right_path}")
         return await EnrollUser_bothiris(output_L=output_L, output_R=output_R, pcode=pcode, cid=cid)
     elif output_L:
+        left_path = save_iris_image(left_iris, cid, "L", unique_id)
+        print(f"Left iris saved to {left_path}")
         return await EnrollUser_singleiris(output=output_L, eye_side="left", pcode=pcode, cid=cid)
     else:
+        right_path = save_iris_image(right_iris, cid, "R", unique_id)
+        print(f"Right iris saved to {right_path}")
         return await EnrollUser_singleiris(output=output_R, eye_side="right", pcode=pcode, cid=cid)
 
 async def verify_user(cid: str, left_iris: UploadFile, right_iris: UploadFile):

@@ -4,3 +4,4 @@ __pycache__/
 .env
 BMT-20/
 volumes/
+iris_image/
