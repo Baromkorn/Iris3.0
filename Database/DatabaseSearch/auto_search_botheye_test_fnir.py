@@ -167,14 +167,16 @@ for sets in os.listdir(workdir):
             fn_check = False
             print('Match_result_L:',closest_distance_L,index_L)
             print('Match_result_R:',closest_distance_R,index_R)
-            if pcode_array_L[index_L] == pcode_array_R[index_R] and cid_array_L[index_L] == cid_array_R[index_R] and count == pcode_array_L[index_L][1:5]:
-                if match_result_L[0][3] or match_result_R[0][3]:
-                    print("Count=",count)
-                    print("pcode=",pcode_array_L[index_L][1:5])
+            if count == pcode_array_L[index_L][1:5] and count == pcode_array_R[index_R][1:5]:
+                if ((closest_distance_L+closest_distance_R)/2) > 0.37:
+                    print("pcode_array_L[index_L]: ",pcode_array_L[index_L],"pcode_array_R[index_R]",pcode_array_R[index_R])
+                    print("cid_array_L[index_L]:",cid_array_L[index_L],"cid_array_R[index_R]:",cid_array_R[index_R])
                     fn_check = True
                     print("No Match in system, HD>0.37")
                     print(closest_distance_L)
-                if not (match_result_L[0][3] or match_result_R[0][3]) :
+                else:
+                    print("pcode_array_L[index_L]: ",pcode_array_L[index_L],"pcode_array_R[index_R]",pcode_array_R[index_R])
+                    print("cid_array_L[index_L]:",cid_array_L[index_L],"cid_array_R[index_R]:",cid_array_R[index_R])
                     print("Count=",count)
                     print("pcode=",pcode_array_L[index_L][1:5])
                     print("Matched with pcode: %s"%(pcode_array_L[index_L]),"and cid: %s"%(cid_array_L[index_L]),"Distance: %.6f"%(closest_distance_L))
@@ -194,5 +196,5 @@ print("Disconnected to Milvus.")
 print("Count_fn=",count_fn)
 print("Total run=",total_run)
 print(count_fn/total_run*100)
-with open("not_path.json", "w") as json_file:
-    json.dump(not_path, json_file, indent=4)
+#with open("not_path.json", "w") as json_file:
+#    json.dump(not_path, json_file, indent=4)

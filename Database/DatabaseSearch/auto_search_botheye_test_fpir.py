@@ -164,6 +164,7 @@ for sets in os.listdir(workdir_new):
         closest_distance_R = match_result_R[0][0]
         index_R = match_result_R[0][1]
         fp_check = False
+        print(sets)
         print('Match_result_L:',closest_distance_L,index_L)
         print('Match_result_R:',closest_distance_R,index_R)
         if match_result_L[0][3] or match_result_R[0][3]:
