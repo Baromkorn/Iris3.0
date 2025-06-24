@@ -12,12 +12,22 @@ async def VerifyUser_singleiris(cid: str, output, eye_side: str):
     print(res)
     if res.get("state") != "Loaded":
         client.load_collection(collection_name="iris_collection")
+
+    # Determine field type
+    if cid.startswith("p") and cid[1:].isdigit():
+        field_name = "pcode"
+    elif cid.isdigit():
+        field_name = "cid"
+    else:
+        connections.disconnect("default")
+        return {"status": "failed", "reason": "Invalid identifier format."}
+
     data = output["iris_template"]
 
     res = client.query(
         collection_name="iris_collection",
-        filter=f'cid == "{cid}" and eye_side == "{eye_side}"',
-        output_fields=["iris_codes", "mask_codes"],
+        filter=f'{field_name} == "{cid}" and eye_side == "{eye_side}"',
+        output_fields=["iris_codes", "mask_codes", "cid"],
         limit=1
     )
     print(f"{eye_side.capitalize()} eye query result:", res)
@@ -26,7 +36,7 @@ async def VerifyUser_singleiris(cid: str, output, eye_side: str):
         connections.disconnect("default")
         return {
             "status": "failed",
-            "reason": f"No matching {eye_side} eye for cid {cid} found in the database."
+            "reason": f"No matching {eye_side} eye for {field_name} {cid} found in the database."
         }
 
     new_data = extract_template(res[0])
@@ -41,7 +51,7 @@ async def VerifyUser_singleiris(cid: str, output, eye_side: str):
             "status": "success",
             "match": True,
             "message": "Found a match in the database",
-            "cid": cid
+            "cid": res[0].get("cid", cid)
         }
     else:
         return {

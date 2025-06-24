@@ -52,6 +52,7 @@ async def SearchUser_singleiris(output, eye_side):
 
     hd = closest_distance
     scaled_hd = int(hd * 2000)
+    score = 2000 - scaled_hd
 
     connections.disconnect("default")
     print("Disconnected from Milvus.")
@@ -66,5 +67,5 @@ async def SearchUser_singleiris(output, eye_side):
         "status": "success",
         "pcode": pcode,
         "cid": cid,
-        "score": scaled_hd
+        "score": score
     }

@@ -63,6 +63,7 @@ async def verify_user(cid: str, left_iris: UploadFile, right_iris: UploadFile):
     """
     output_L = await process_iris(left_iris, "left")
     output_R = await process_iris(right_iris, "right")
+    
 
     if not output_L and not output_R:
         raise HTTPException(status_code=400, detail="Neither image contains a valid iris.")

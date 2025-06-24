@@ -61,6 +61,7 @@ async def SearchUser_bothiris(output_L, output_R):
     # Average Hamming distance
     hd = (left_results['closest_distance'] + right_results['closest_distance']) / 2
     scaled_hd = int(hd * 2000)
+    score = 2000-scaled_hd
 
     # Disconnect
     connections.disconnect("default")
@@ -80,7 +81,7 @@ async def SearchUser_bothiris(output_L, output_R):
             "status": "success",
             "pcode": left_results['pcode_array'][idx_L],
             "cid": left_results['cid_array'][idx_L],
-            "score": scaled_hd
+            "score": score
         }
     else:
         return {"status": "failed", "reason": "Left and Right Iris do not match"}

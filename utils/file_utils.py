@@ -1,6 +1,8 @@
 import cv2
 from iris import IrisTemplate
 import numpy as np
+from typing import Optional
+import base64
 
 def save_file(content: bytes, filename: str):
     with open(filename, "wb") as f:
@@ -46,3 +48,11 @@ def convert_bytes_to_bool_list(byte_data):
             bool_list.append(bit)
     bool_list = np.array(bool_list).reshape(2,16, 256, 2).astype(bool)
     return bool_list
+
+def decode_base64_image(b64_string: str) -> Optional[np.ndarray]:
+    try:
+        decoded = base64.b64decode(b64_string)
+        image_np = np.frombuffer(decoded, np.uint8)
+        return cv2.imdecode(image_np, cv2.IMREAD_GRAYSCALE)
+    except Exception:
+        return None

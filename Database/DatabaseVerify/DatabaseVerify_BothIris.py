@@ -11,13 +11,21 @@ async def VerifyUser_bothiris(cid: str, output_L, output_R):
     print(res)
     if res.get("state") != "Loaded":
         client.load_collection(collection_name="iris_collection")
+        
+    if cid.startswith("p") and cid[1:].isdigit():
+            field_name = "pcode"
+    elif cid.isdigit():
+            field_name = "cid"
+    else:
+        connections.disconnect("default")
+        return {"status": "failed", "reason": "Invalid identifier format."}
     data_L = output_L["iris_template"]
     data_R = output_R["iris_template"]
 
-    # LEFT eye verification
+     # LEFT eye verification
     res_L = client.query(
         collection_name="iris_collection",
-        filter=f'cid == "{cid}" and eye_side == "left"',
+        filter=f'{field_name} == "{cid}" and eye_side == "left"',
         output_fields=["iris_codes", "mask_codes"],
         limit=1
     )
@@ -31,7 +39,7 @@ async def VerifyUser_bothiris(cid: str, output_L, output_R):
     # RIGHT eye verification
     res_R = client.query(
         collection_name="iris_collection",
-        filter=f'cid == "{cid}" and eye_side == "right"',
+        filter=f'{field_name} == "{cid}" and eye_side == "right"',
         output_fields=["iris_codes", "mask_codes"],
         limit=1
     )
@@ -52,7 +60,7 @@ async def VerifyUser_bothiris(cid: str, output_L, output_R):
             "status": "success",
             "match": True,
             "message": "Found a match in the database",
-            "cid": cid
+            "cid": res_L[0].get("cid", cid)  # return actual cid if available
         }
     else:
         return {

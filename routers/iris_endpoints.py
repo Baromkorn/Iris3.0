@@ -33,7 +33,7 @@ async def enroll(
     if status == "success" :
         return True
     elif status == "failed" :
-        return res
+        return False
 
 
 @router.post("/verify/")
@@ -68,7 +68,7 @@ async def verify(
         else :
             return False
     elif status == "failed" :
-        return res
+        return False
 
 @router.post("/search/")
 async def search(
@@ -88,9 +88,16 @@ async def search(
             - reason (str, optional): Additional info for status failed
             - pcode (str,optional): Personal code of top match
             - cid (str,optional): Citizen ID of top match
-            - score (int,optional): normalized score of hamming distance from 1-2000, threshold used is 0.37, so <=740 is a match  
+            - score (int,optional): normalized score of hamming distance from 1-2000, threshold used is 0.37, so >=740 is a match  
     """
-    return await search_user(left_iris, right_iris)
+    res = await search_user(left_iris, right_iris)
+    status = res.get("status")
+    if status == "success" :
+        return [res]
+    elif status == "failed" :
+        return []
+
+    
 
 @router.get("/check_available/{pcode_or_cid}/")
 async def check(pcode_or_cid: str):
@@ -115,4 +122,4 @@ async def check(pcode_or_cid: str):
         else :
             return False
     elif status == "failed" :
-        return res
+        return False
