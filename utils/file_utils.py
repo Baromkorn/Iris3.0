@@ -53,6 +53,12 @@ def decode_base64_image(b64_string: str) -> Optional[np.ndarray]:
     try:
         decoded = base64.b64decode(b64_string)
         image_np = np.frombuffer(decoded, np.uint8)
-        return cv2.imdecode(image_np, cv2.IMREAD_GRAYSCALE)
-    except Exception:
+        image = cv2.imdecode(image_np, cv2.IMREAD_GRAYSCALE)
+        if image is None:
+            print("Failed to decode image")
+        else:
+            print("Image decoded:", image.shape)
+        return image
+    except Exception as e:
+        print("Error decoding base64 image:", e)
         return None

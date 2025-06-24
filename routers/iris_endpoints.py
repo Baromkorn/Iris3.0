@@ -1,19 +1,32 @@
 from fastapi import APIRouter, UploadFile, File, Depends
+from pydantic import BaseModel
 from typing import Optional
 from services_logic.iris_service import verify_user, enroll_user, search_user
 from Database.DatabaseCheck.DatabaseCheck import check_available
 from routers.API_KEYMAKER import get_api_key
+from utils.file_utils import decode_base64_image
 
 router = APIRouter(
     dependencies=[Depends(get_api_key)]
                    )
 
+class IrisPayload_Enroll(BaseModel):
+    iris_L: Optional[str] = None
+    iris_R: Optional[str] = None
+    pcode: str 
+    cid: str
+
+class IrisPayload_Verify(BaseModel):
+    iris_L: Optional[str] = None
+    iris_R: Optional[str] = None
+    cid: str
+
+class IrisPayload_search(BaseModel):
+    iris_L: Optional[str] = None
+    iris_R: Optional[str] = None
+
 @router.post("/")
-async def enroll(
-    left_iris: Optional[UploadFile] = File(None),
-    right_iris: Optional[UploadFile] = File(None),
-    pcode: str = "",
-    cid: str = ""
+async def enroll(payload: IrisPayload_Enroll
 ):
     """
     Enroll a user with optional left and right iris images and identifiers. Duplicates with same 
@@ -28,19 +41,22 @@ async def enroll(
         dict: Enrollment result containing:
             - status (str): "success" or "failed"
     """
-    res = await enroll_user(left_iris, right_iris, pcode, cid)
+    left = decode_base64_image(payload.iris_L) if payload.iris_L else None
+    right = decode_base64_image(payload.iris_R) if payload.iris_R else None
+    res = await enroll_user(left_iris=left,
+    right_iris=right,
+    pcode=payload.pcode,
+    cid=payload.cid)
     status = res.get("status")
     if status == "success" :
         return True
-    elif status == "failed" :
+    else :
         return False
 
 
 @router.post("/verify/")
 async def verify(
-    cid: str,
-    left_iris: Optional[UploadFile]=None,
-    right_iris: Optional[UploadFile]=None
+    payload: IrisPayload_Verify
 ):
     """
     Verify a user's iris to cid in Database, BOTH sides have to match or else it will return false
@@ -59,7 +75,9 @@ async def verify(
             - reason (str, optional): Reason for failure if any
            
     """
-    res = await verify_user(cid, left_iris, right_iris)
+    left = decode_base64_image(payload.iris_L) if payload.iris_L else None
+    right = decode_base64_image(payload.iris_R) if payload.iris_R else None
+    res = await verify_user(payload.cid ,left, right)
     status = res.get("status")
     if status == "success" :
         match = res.get("match")
@@ -67,13 +85,12 @@ async def verify(
             return True
         else :
             return False
-    elif status == "failed" :
+    else :
         return False
 
 @router.post("/search/")
 async def search(
-    left_iris: Optional[UploadFile] = File(None),
-    right_iris: Optional[UploadFile] = File(None)
+    payload: IrisPayload_search
 ):
     """
     Search the database for users matching the provided iris images. Using Top-5 results of vector search combined with hamming_distance matcher from open-iris
@@ -90,7 +107,9 @@ async def search(
             - cid (str,optional): Citizen ID of top match
             - score (int,optional): normalized score of hamming distance from 1-2000, threshold used is 0.37, so >=740 is a match  
     """
-    res = await search_user(left_iris, right_iris)
+    left = decode_base64_image(payload.iris_L) if payload.iris_L else None
+    right = decode_base64_image(payload.iris_R) if payload.iris_R else None
+    res = await search_user(left, right)
     status = res.get("status")
     if status == "success" :
         return [res]
@@ -113,6 +132,7 @@ async def check(pcode_or_cid: str):
             - available (bool, optional): True if already in database, False if not found
             - reason (str, optional): Additional details of status failed
     """
+    
     res = await check_available(pcode_or_cid)
     status = res.get("status")
     Used = res.get("available")
@@ -121,5 +141,5 @@ async def check(pcode_or_cid: str):
             return True
         else :
             return False
-    elif status == "failed" :
+    else :
         return False

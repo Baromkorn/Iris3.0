@@ -14,24 +14,26 @@ import uuid
 
 
 # Helper function to process an iris image
-async def process_iris(iris_file: Optional[UploadFile], eye_side: str) -> Optional[dict]:
-    if not iris_file:
+async def process_iris(iris_file: Optional[np.ndarray], eye_side: str) -> Optional[dict]:
+    if iris_file is None:
+        print(f"[{eye_side}] No image provided or failed to decode.")
         return None
     try:
-        contents = await iris_file.read()
-        image = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_GRAYSCALE)
-        output = iris_pipeline(img_data=image, eye_side=eye_side)
+        output = iris_pipeline(img_data=iris_file, eye_side=eye_side)
         if output["error"]:
-            raise ValueError(f"{eye_side.capitalize()} eye image error")
+            print(f"[{eye_side}] Pipeline error: {output['error']}")
+            return None
+        print(f"[{eye_side}] Iris pipeline output OK")
         return output
-    except Exception:
+    except Exception as e:
+        print(f"[{eye_side}] Exception during pipeline: {e}")
         return None
 
 async def enroll_user(
-    left_iris: Optional[UploadFile] = File(None),
-    right_iris: Optional[UploadFile] = File(None),
-    pcode: str = "",
-    cid: str = ""
+    pcode: str,
+    cid: str,
+    left_iris: Optional[np.ndarray] = None,
+    right_iris: Optional[np.ndarray] = None,
 ):
     """
     Enroll user using left and/or right iris images.
@@ -40,7 +42,7 @@ async def enroll_user(
     output_R = await process_iris(right_iris, "right")
 
     if not output_L and not output_R:
-        raise HTTPException(status_code=400, detail="Neither image contains a valid iris.")
+        return False
     unique_id = uuid.uuid4().hex
     if output_L and output_R:
         left_path = save_iris_image(left_iris, cid, "L", unique_id)
@@ -57,7 +59,11 @@ async def enroll_user(
         print(f"Right iris saved to {right_path}")
         return await EnrollUser_singleiris(output=output_R, eye_side="right", pcode=pcode, cid=cid)
 
-async def verify_user(cid: str, left_iris: UploadFile, right_iris: UploadFile):
+async def verify_user(
+        cid: str,
+        left_iris: Optional[np.ndarray] = None,
+        right_iris: Optional[np.ndarray] = None
+         ):
     """
     Verify iris images against a given citizen ID.
     """
@@ -66,7 +72,7 @@ async def verify_user(cid: str, left_iris: UploadFile, right_iris: UploadFile):
     
 
     if not output_L and not output_R:
-        raise HTTPException(status_code=400, detail="Neither image contains a valid iris.")
+        return False
     if output_L and output_R:
         return await VerifyUser_bothiris(output_L=output_L, output_R=output_R, cid=cid)
     elif output_L:
@@ -75,8 +81,8 @@ async def verify_user(cid: str, left_iris: UploadFile, right_iris: UploadFile):
         return await VerifyUser_singleiris(output=output_R, eye_side="right", cid=cid)
 
 async def search_user(
-    left_iris: Optional[UploadFile] = File(None),
-    right_iris: Optional[UploadFile] = File(None)
+    left_iris: Optional[np.ndarray] = None,
+    right_iris: Optional[np.ndarray] = None
 ):
     """
     Search for a matching user using iris images.
@@ -85,7 +91,7 @@ async def search_user(
     output_R = await process_iris(right_iris, "right")
 
     if not output_L and not output_R:
-        raise HTTPException(status_code=400, detail="Neither image contains a valid iris.")
+        return False
 
     if output_L and output_R:
         return await SearchUser_bothiris(output_L=output_L, output_R=output_R)

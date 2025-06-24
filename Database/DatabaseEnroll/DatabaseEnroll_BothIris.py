@@ -27,6 +27,10 @@ async def EnrollUser_bothiris(output_L, output_R, pcode, cid):
     data_L = extract_data(output_L, "left")
     data_R = extract_data(output_R, "right")
 
+    res = client.get_load_state(collection_name="iris_collection")
+    print(res)
+    if res.get("state") != "Loaded":
+        client.load_collection(collection_name="iris_collection")
     # Check for existing user
     existing = client.query(
         collection_name="iris_collection",

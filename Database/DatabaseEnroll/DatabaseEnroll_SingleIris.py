@@ -24,7 +24,10 @@ async def EnrollUser_singleiris(output, pcode, eye_side, cid):
         "cid": cid,
         "eye_side": eye_side
     }
-
+    res = client.get_load_state(collection_name="iris_collection")
+    print(res)
+    if res.get("state") != "Loaded":
+        client.load_collection(collection_name="iris_collection")
     # Check for existing user with same cid + eye_side
     existing = client.query(
         collection_name="iris_collection",
