@@ -1,9 +1,12 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Depends
 from typing import Optional
 from services_logic.iris_service import verify_user, enroll_user, search_user
 from Database.DatabaseCheck.DatabaseCheck import check_available
+from routers.API_KEYMAKER import get_api_key
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_api_key)]
+                   )
 
 @router.post("/")
 async def enroll(
