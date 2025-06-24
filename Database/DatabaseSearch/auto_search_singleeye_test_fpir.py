@@ -11,7 +11,6 @@ from pymilvus import (
 )
 from fast_api.utils.file_utils import convert_bool_list_to_bytes, convert_bytes_to_template, convert_bytes_to_bool_list
 from fast_api.utils.iris_utils import Iris_Matcher
-from fast_api.services_logic.iris_service import search_user_bothiris
 from fast_api.core.iris_setup import iris_pipeline,matcher
 from fast_api.Database.DatabaseSearch.DatabaseSearch_BothIris import SearchUser_bothiris
 def top5(probe_template,gallery_array) :
@@ -48,7 +47,6 @@ o2 = output2["iris_template"]
 print(top5(o1,[o2]))'''
 iris_data_folder = "iris_dat"
 count_fp = 0
-count_fn = 0
 for sets in os.listdir(workdir_new):
     if sets=='1':
         continue
@@ -144,5 +142,5 @@ for sets in os.listdir(workdir_new):
 connections.disconnect("default")
 print("Disconnected to Milvus.")
 print(count_fp/1034*100)
-data = np.array(answer, dtype=object)
-np.savetxt("single_eye_fpir.csv", data, fmt='%s', delimiter=",", header=columns, comments='')
+#data = np.array(answer, dtype=object)
+#np.savetxt("single_eye_fpir.csv", data, fmt='%s', delimiter=",", header=columns, comments='')

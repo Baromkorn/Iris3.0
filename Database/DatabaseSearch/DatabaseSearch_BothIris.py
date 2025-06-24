@@ -127,7 +127,7 @@ async def SearchUser_bothiris(output_L, output_R) :
     connections.disconnect("default")
     print("Disconnected to Milvus.")
     if pcode_array_L[index_L] == pcode_array_R[index_R] and cid_array_L[index_L] == cid_array_R[index_R] :
-        if closest_distance_L > 0.37 and closest_distance_R > 0.37:
+        if closest_distance_L > 0.37 or closest_distance_R > 0.37:
             return {"status": "failed",
                     "reason": "No Match in system, HD>0.37"}
         if closest_distance_L <= 0.37 and closest_distance_R <= 0.37 :

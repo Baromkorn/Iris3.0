@@ -11,7 +11,6 @@ from pymilvus import (
 )
 from fast_api.utils.file_utils import convert_bool_list_to_bytes, convert_bytes_to_template, convert_bytes_to_bool_list
 from fast_api.utils.iris_utils import Iris_Matcher
-from fast_api.services_logic.iris_service import search_user_bothiris
 from fast_api.core.iris_setup import iris_pipeline,matcher
 from fast_api.Database.DatabaseSearch.DatabaseSearch_BothIris import SearchUser_bothiris
 def top5(probe_template,gallery_array) :
