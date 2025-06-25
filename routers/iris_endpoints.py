@@ -14,7 +14,7 @@ class IrisPayload_Enroll(BaseModel):
     iris_L: Optional[str] = None
     iris_R: Optional[str] = None
     pcode: str 
-    cid: str
+    cid: Optional[str] = None
 
 class IrisPayload_Verify(BaseModel):
     iris_L: Optional[str] = None
