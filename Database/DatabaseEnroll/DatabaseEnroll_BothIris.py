@@ -39,7 +39,7 @@ async def EnrollUser_bothiris(output_L, output_R, pcode, cid):
         limit=1
     )
     
-    if existing:
+    if existing and cid != "" :
         connections.disconnect("default")
         return {"status": "failed", "reason": "Duplicate found in database"}
 

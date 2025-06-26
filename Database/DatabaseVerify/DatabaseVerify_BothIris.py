@@ -12,7 +12,7 @@ async def VerifyUser_bothiris(cid: str, output_L, output_R):
     if res.get("state") != "Loaded":
         client.load_collection(collection_name="iris_collection")
         
-    if cid.startswith("p") and cid[1:].isdigit():
+    if cid.startswith("P") and cid[1:].isdigit():
             field_name = "pcode"
     elif cid.isdigit():
             field_name = "cid"

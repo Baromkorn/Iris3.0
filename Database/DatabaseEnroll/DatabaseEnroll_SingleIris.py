@@ -36,7 +36,7 @@ async def EnrollUser_singleiris(output, pcode, eye_side, cid):
         limit=1
     )
 
-    if existing:
+    if existing and cid != "":
         connections.disconnect("default")
         return {"status": "failed", "reason": "Duplicate found in database"}
 

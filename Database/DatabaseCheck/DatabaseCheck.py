@@ -20,7 +20,7 @@ async def check_available(pcode_or_cid: str) -> dict:
     if not pcode_or_cid:
         return {"status": "failed", "reason": "Empty value"}
 
-    if pcode_or_cid.startswith("p") and pcode_or_cid[1:].isdigit():
+    if pcode_or_cid.startswith("P") and pcode_or_cid[1:].isdigit():
         filter_expr = f'pcode == "{pcode_or_cid}"'
     elif pcode_or_cid.isdigit():
         filter_expr = f'cid == "{pcode_or_cid}"'

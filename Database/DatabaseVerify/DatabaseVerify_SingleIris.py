@@ -14,7 +14,7 @@ async def VerifyUser_singleiris(cid: str, output, eye_side: str):
         client.load_collection(collection_name="iris_collection")
 
     # Determine field type
-    if cid.startswith("p") and cid[1:].isdigit():
+    if cid.startswith("P") and cid[1:].isdigit():
         field_name = "pcode"
     elif cid.isdigit():
         field_name = "cid"

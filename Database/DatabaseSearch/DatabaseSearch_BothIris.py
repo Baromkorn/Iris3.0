@@ -70,11 +70,12 @@ async def SearchUser_bothiris(output_L, output_R):
     idx_L = left_results['index']
     idx_R = right_results['index']
 
+
     # Check matching pcode and cid
     if (left_results['pcode_array'][idx_L] == right_results['pcode_array'][idx_R] and
         left_results['cid_array'][idx_L] == right_results['cid_array'][idx_R]):
 
-        if left_results['closest_distance'] > 0.37 or right_results['closest_distance'] > 0.37:
+        if (left_results['closest_distance'] + right_results['closest_distance'])/2 > 0.37:
             return {"status": "failed", "reason": "No Match in system, HD > 0.37"}
 
         return {

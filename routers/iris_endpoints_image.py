@@ -83,5 +83,3 @@ async def check(pcode_or_cid: str):
         return False
 
 # Create separate app instance
-app = FastAPI(title="Iris Image Upload API")
-app.include_router(image_router)
