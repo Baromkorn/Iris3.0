@@ -24,7 +24,7 @@ async def SearchUser_bothiris(output_L, output_R):
         "metric_type": "HAMMING"
     }
 
-    # Search Left eye
+    # Left eye search
     query_vector_L = convert_bool_list_to_bytes(combined_codes_L)
     res_L = client.search(
         collection_name="iris_collection",
@@ -33,11 +33,11 @@ async def SearchUser_bothiris(output_L, output_R):
         search_params=search_params,
         limit=5,
         filter='eye_side like "left%"',
-        output_fields=["pcode","cid","iris_codes","mask_codes"]
+        output_fields=["pcode", "cid", "iris_codes", "mask_codes"]
     )
     left_results = await process_search_results(res_L, data_L, "left")
 
-    # Search Right eye
+    # Right eye search
     query_vector_R = convert_bool_list_to_bytes(combined_codes_R)
     res_R = client.search(
         collection_name="iris_collection",
@@ -46,43 +46,30 @@ async def SearchUser_bothiris(output_L, output_R):
         search_params=search_params,
         limit=5,
         filter='eye_side like "right%"',
-        output_fields=["pcode","cid","iris_codes","mask_codes"]
+        output_fields=["pcode", "cid", "iris_codes", "mask_codes"]
     )
     right_results = await process_search_results(res_R, data_R, "right")
 
-    print(f"Top 5 pcode_L: {left_results['pcode_array'][:5]}")
-    print(f"Top 5 pcode_R: {right_results['pcode_array'][:5]}")
-
-    # Defensive: check if no matches found
-    if not left_results['pcode_array'] or not right_results['pcode_array']:
-        connections.disconnect("default")
-        return {"status": "failed", "reason": "No search results returned for one or both eyes"}
-
-    # Average Hamming distance
-    hd = (left_results['closest_distance'] + right_results['closest_distance']) / 2
-    scaled_hd = int(hd * 2000)
-    score = 2000-scaled_hd
-
-    # Disconnect
     connections.disconnect("default")
     print("Disconnected from Milvus.")
 
-    idx_L = left_results['index']
-    idx_R = right_results['index']
+    # Merge left and right eye results
+    combined_rank = left_results + right_results
 
+    # Deduplicate by keeping only highest score for each (pcode, cid)
+    unique_results = {}
+    for entry in combined_rank:
+        key = (entry["pcode"], entry["cid"])
+        if key not in unique_results or entry["score"] > unique_results[key]["score"]:
+            unique_results[key] = entry
 
-    # Check matching pcode and cid
-    if (left_results['pcode_array'][idx_L] == right_results['pcode_array'][idx_R] and
-        left_results['cid_array'][idx_L] == right_results['cid_array'][idx_R]):
+    # Convert to list and get top 5 by score
+    filtered_top5 = sorted(unique_results.values(), key=lambda x: x["score"], reverse=True)[:5]
 
-        if (left_results['closest_distance'] + right_results['closest_distance'])/2 > 0.37:
-            return {"status": "failed", "reason": "No Match in system, HD > 0.37"}
+    if not filtered_top5:
+        return {"status": "failed", "reason": "No matching person across both eyes"}
 
-        return {
-            "status": "success",
-            "pcode": left_results['pcode_array'][idx_L],
-            "cid": left_results['cid_array'][idx_L],
-            "score": score
-        }
-    else:
-        return {"status": "failed", "reason": "Left and Right Iris do not match"}
+    return {
+        "status": "success",
+        "results": filtered_top5
+    }

@@ -43,29 +43,17 @@ async def SearchUser_singleiris(output, eye_side):
         output_fields=["pcode", "cid", "iris_codes", "mask_codes"]
     )
 
-    result = await process_search_results(res, data, eye_side)
-
-    closest_distance = result["closest_distance"]
-    index = result["index"]
-    pcode = result["pcode_array"][index]
-    cid = result["cid_array"][index]
-
-    hd = closest_distance
-    scaled_hd = int(hd * 2000)
-    score = 2000 - scaled_hd
-
+    top_matches = await process_search_results(res, data, eye_side)
     connections.disconnect("default")
     print("Disconnected from Milvus.")
 
-    if closest_distance > 0.37:
+    if not top_matches:
         return {
             "status": "failed",
-            "reason": "No Match in system, HD > 0.37"
+            "reason": "No valid matches in system"
         }
 
     return {
         "status": "success",
-        "pcode": pcode,
-        "cid": cid,
-        "score": score
+        "results": top_matches
     }

@@ -13,8 +13,8 @@ router = APIRouter(
 class IrisPayload_Enroll(BaseModel):
     iris_L: Optional[str] = None
     iris_R: Optional[str] = None
-    pcode: str 
-    cid: str
+    pcode: Optional[str] = ""
+    cid: Optional[str] = ""
 
 class IrisPayload_Verify(BaseModel):
     iris_L: Optional[str] = None
@@ -111,8 +111,9 @@ async def search(
     right = decode_base64_image(payload.iris_R) if payload.iris_R else None
     res = await search_user(left, right)
     status = res.get("status")
+    matches = res.get("results")
     if status == "success" :
-        return [res]
+        return matches
     elif status == "failed" :
         return []
 

@@ -3,6 +3,9 @@ import numpy as np
 from utils.file_utils import convert_bool_list_to_bytes
 
 async def EnrollUser_bothiris(output_L, output_R, pcode, cid):
+    if pcode == "" and cid == "" :
+        return {"status": "failed", "reason": "No pcode and cid provided"}
+    print("\n=== Connecting to Milvus ===\n")
     print("\n=== Connecting to Milvus ===\n")
     connections.connect("default", host="localhost", port="19530")
     client = MilvusClient(uri="http://localhost:19530")
@@ -34,12 +37,12 @@ async def EnrollUser_bothiris(output_L, output_R, pcode, cid):
     # Check for existing user
     existing = client.query(
         collection_name="iris_collection",
-        filter=f'cid == "{cid}"',
+        filter=f'cid == "{cid}" and pcode == "{pcode}"',
         output_fields=["cid"],
         limit=1
     )
     
-    if existing and cid != "" :
+    if (existing and cid != "") or (existing and pcode != ""):
         connections.disconnect("default")
         return {"status": "failed", "reason": "Duplicate found in database"}
 

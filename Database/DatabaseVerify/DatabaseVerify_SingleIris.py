@@ -32,7 +32,7 @@ async def VerifyUser_singleiris(cid: str, output, eye_side: str):
     )
     print(f"{eye_side.capitalize()} eye query result:", res)
 
-    if not res:
+    if not res or cid == "":
         connections.disconnect("default")
         return {
             "status": "failed",

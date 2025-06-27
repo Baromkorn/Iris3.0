@@ -3,10 +3,14 @@ import numpy as np
 from utils.file_utils import convert_bool_list_to_bytes
 
 async def EnrollUser_singleiris(output, pcode, eye_side, cid):
+    # Check for case with no pcode and cid
+    if pcode == "" and cid == "" :
+        return {"status": "failed", "reason": "No pcode and cid provided"}
     print("\n=== Connecting to Milvus ===\n")
     connections.connect("default", host="localhost", port="19530")
     client = MilvusClient(uri="http://localhost:19530")
 
+    
     # Check if collection exists
     if not utility.has_collection("iris_collection"):
         connections.disconnect("default")
@@ -31,12 +35,13 @@ async def EnrollUser_singleiris(output, pcode, eye_side, cid):
     # Check for existing user with same cid + eye_side
     existing = client.query(
         collection_name="iris_collection",
-        filter=f'cid == "{cid}" and eye_side == "{eye_side}"',
+        filter=f'cid == "{cid}" and eye_side == "{eye_side}" and pcode == "{pcode}"',
         output_fields=["cid"],
         limit=1
     )
 
-    if existing and cid != "":
+    
+    if (existing and cid != "") or (existing and pcode != ""):
         connections.disconnect("default")
         return {"status": "failed", "reason": "Duplicate found in database"}
 

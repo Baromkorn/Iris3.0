@@ -23,8 +23,8 @@ image_router = APIRouter(
 async def enroll_image(
     iris_L: Optional[UploadFile] = File(None),
     iris_R: Optional[UploadFile] = File(None),
-    pcode: str = "",
-    cid: str = ""
+    pcode: Optional[str] = "",
+    cid: Optional[str] = ""
 ):
     left = decode_bytes_image(await iris_L.read()) if iris_L else None
     right = decode_bytes_image(await iris_R.read()) if iris_R else None
@@ -63,8 +63,9 @@ async def search_image(
     right = decode_bytes_image(await iris_R.read()) if iris_R else None
     res = await search_user(left, right)
     status = res.get("status")
+    matches = res.get("results")
     if status == "success" :
-        return [res]
+        return matches
     elif status == "failed" :
         return []
 

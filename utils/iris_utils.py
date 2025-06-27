@@ -28,43 +28,46 @@ def extract_template(hit: dict) -> bytes:
     return convert_bytes_to_template(combined_vector)
 
 async def process_search_results(res, data, eye_side):
-    """Helper to process Milvus search results and compute matcher distances."""
     template_array = []
     pcode_array = []
     cid_array = []
     v_distance_array = []
+    matcher_inputs = []
 
     for hits in res:
         for hit in hits:
-            vector = hit.entity.get("iris_codes")   # stored binary vector
-            mask = hit.entity.get("mask_codes")     # stored mask
+            vector = hit.entity.get("iris_codes")
+            mask = hit.entity.get("mask_codes")
             pcode = hit.pcode
             cid = hit.cid
-            v_distance = hit.distance
 
-            pcode_array.append(pcode)
-            cid_array.append(cid)
-            v_distance_array.append(v_distance)
-
-            # process mask bytes
+            # Process mask bytes
             mask = np.array(mask)
             mask = convert_bytes_to_bool_list(mask)
             masks = np.concatenate([code.flatten() for code in mask])
-            mask = convert_bool_list_to_bytes(masks)
+            mask_bytes = convert_bool_list_to_bytes(masks)
 
-            combined_vector = vector + mask
-            new_data = convert_bytes_to_template(combined_vector)
-            template_array.append(new_data)
+            combined_vector = vector + mask_bytes
+            template = convert_bytes_to_template(combined_vector)
 
-    # Run matcher and get closest result info
-    match_result = await Iris_Matcher(data, template_array)
-    closest_match, closest_distance, index = match_result
+            matcher_inputs.append((template, pcode, cid))
 
-    return {
-        "pcode_array": pcode_array,
-        "cid_array": cid_array,
-        "v_distance_array": v_distance_array,
-        "closest_match": closest_match,
-        "closest_distance": closest_distance,
-        "index": index
-    }
+    # Compute matcher scores
+    results = []
+    for i, (template, pcode, cid) in enumerate(matcher_inputs):
+        match, hd, _ = await Iris_Matcher(data, [template])
+        score = 2000 - int(hd * 2000)
+        results.append({
+            "pcode": pcode,
+            "cid": cid,
+            "hamming_distance": round(hd, 4),
+            "score": score
+        })
+
+    # Sort results by lowest hamming distance
+    results.sort(key=lambda x: x["hamming_distance"])
+
+    # Filter by threshold (optional)
+    #filtered_results = [r for r in results if r["hamming_distance"] <= 0.37]
+
+    return results
