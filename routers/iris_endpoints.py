@@ -118,7 +118,7 @@ async def search(
 
     
 
-@router.get("/check_available/{pcode_or_cid}/")
+@router.get("/check_available/{pcode_or_cid}")
 async def check(pcode_or_cid: str):
     """
     Check if a given personal code or Citizen ID is available in the database.

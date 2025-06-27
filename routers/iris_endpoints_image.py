@@ -19,7 +19,7 @@ image_router = APIRouter(
     dependencies=[Depends(get_api_key)]
                    )
 
-@image_router.post("/enroll_image/")
+@image_router.post("/enroll/")
 async def enroll_image(
     iris_L: Optional[UploadFile] = File(None),
     iris_R: Optional[UploadFile] = File(None),
@@ -35,7 +35,7 @@ async def enroll_image(
     else :
         return False
 
-@image_router.post("/verify_image/")
+@image_router.post("/verify/")
 async def verify_image(
     iris_L: Optional[UploadFile] = File(None),
     iris_R: Optional[UploadFile] = File(None),
@@ -54,7 +54,7 @@ async def verify_image(
     else :
         return False
 
-@image_router.post("/search_image/")
+@image_router.post("/search/")
 async def search_image(
     iris_L: Optional[UploadFile] = File(None),
     iris_R: Optional[UploadFile] = File(None)
@@ -69,7 +69,7 @@ async def search_image(
         return []
 
 
-@image_router.get("/check_available/{pcode_or_cid}/")
+@image_router.get("/check_available/{pcode_or_cid}")
 async def check(pcode_or_cid: str):
     res = await check_available(pcode_or_cid)
     status = res.get("status")
