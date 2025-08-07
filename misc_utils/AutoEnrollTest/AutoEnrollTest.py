@@ -22,7 +22,7 @@ def convert_bool_list_to_bytes(bool_list):
     return bytes(byte_array)
 ir_pipeline = iris.IRISPipeline()
 #use your own directory
-workdir = r"C:\Users\USER\Desktop\Open-Iris Dev\BMT-20"
+workdir = r"/home/suradej/open-iris_project/open-iris-api/BMT-20"
 print(workdir)
 client=MilvusClient(uri="http://localhost:19530")
 connections.connect("default", host="localhost", port="19530")
